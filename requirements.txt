@@ -1,0 +1,4 @@
+numpy
+openai
+sentence-transformers
+torch

@@ -13,7 +13,7 @@ The repository intentionally excludes unrelated codepaths such as LoCoMo, Memory
 
 ## LongMemEval Result
 
-The paper-reported LongMemEval-S result on the full `500`-item benchmark with `gpt-4o-mini` is:
+The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S with `gpt-4o-mini` on the full `500`-item benchmark:
 
 | Method | Overall ACC |
 | --- | ---: |

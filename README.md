@@ -1,6 +1,6 @@
 # HeLa-Mem
 
-Open-source release of the HeLa-Mem `gpt-4o-mini` LongMemEval experiment.
+Code for HeLa-Mem on LongMemEval with `gpt-4o-mini`.
 
 This repository is not a toy rewrite. The LongMemEval path is carried over from the original experiment code and then cleaned for release:
 

@@ -1,24 +1,17 @@
 # HeLa-Mem
 
-Minimal open-source release of the HeLa-Mem LongMemEval experiment code.
+Open-source release of the HeLa-Mem `gpt-4o-mini` LongMemEval experiment.
 
-This repository contains only the code needed to run the `gpt-4o-mini` LongMemEval experiment:
+This repository is not a toy rewrite. The LongMemEval path is carried over from the original experiment code and then cleaned for release:
 
-- LongMemEval encoding
-- Hebbian episodic memory graph
-- Hebbian knowledge memory
-- LongMemEval evaluation with GPT judge
+- removed hardcoded private API keys
+- removed dependencies on unrelated project directories
+- kept the original LongMemEval encode/eval logic
+- kept the original Hebbian memory, retriever, knowledge memory, and GPT-judge evaluation flow
 
-It intentionally does not include:
+The repository intentionally excludes unrelated codepaths such as LoCoMo, MemoryOS, MemoryChain, paper assets, and old result directories.
 
-- LoCoMo code
-- MemoryOS code
-- MemoryChain code
-- old result folders
-- paper assets
-- unrelated agent experiments
-
-## Repository Layout
+## Included Code
 
 ```text
 HeLa-Mem/
@@ -28,7 +21,8 @@ HeLa-Mem/
 │   ├── hebbian_knowledge_memory.py
 │   ├── hebbian_memory.py
 │   ├── hebbian_retriever.py
-│   ├── profile_extraction.py
+│   ├── profile_utils.py
+│   ├── reranker.py
 │   └── utils.py
 ├── scripts/
 │   ├── encode_longmemeval.sh
@@ -45,26 +39,32 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Set your OpenAI-compatible credentials:
+Configure your API access:
 
 ```bash
 export OPENAI_API_KEY="your-key"
 export OPENAI_BASE_URL="https://api.openai.com/v1"
 ```
 
-If you want request rotation across multiple keys:
+If you want multi-key rotation, provide:
 
 ```bash
 export OPENAI_API_KEYS="key1,key2,key3"
 ```
 
+or
+
+```bash
+export OPENAI_API_KEYS_FILE="/path/to/keys.txt"
+```
+
 The default model is `gpt-4o-mini`.
 
-## Dataset
+## Dataset Format
 
-This repo does not ship LongMemEval-S.
+This repository does not bundle LongMemEval-S.
 
-Expected input is a JSON array where each item has:
+Expected fields per item:
 
 - `question_id`
 - `question`
@@ -74,25 +74,57 @@ Expected input is a JSON array where each item has:
 - `haystack_dates`
 - `haystack_sessions`
 
-The original code was run with files such as:
+## Experiment Entry Points
 
-- `eval/longmemeval/longmemeval_s_50.json`
-- `eval/longmemeval/longmemeval_s_100.json`
-- `eval/longmemeval/longmemeval_s_150.json`
-- `eval/longmemeval/longmemeval_s_200.json`
+The original LongMemEval experiment here is two-stage:
+
+1. `encode_longmemeval.py`
+2. `eval_longmemeval.py`
+
+Encoding builds:
+
+- `*_hebbian.json`
+- `*_long_term.json`
+- `*_long_term_kb_graph.json`
+
+Evaluation does:
+
+- episodic retrieval
+- semantic retrieval
+- answer generation
+- GPT judge scoring
+- per-item result saving
+- summary aggregation
+
+## Paper-Aligned Defaults
+
+The included shell scripts keep the paper-side `gpt-4o-mini` defaults from the original run.
+
+Encoding defaults:
+
+- `HEBBIAN_MODEL=gpt-4o-mini`
+- `HEBBIAN_TAU=1e7`
+- `HEBBIAN_LEARNING_RATE=0.02`
+- `HEBBIAN_DECAY_RATE=0.995`
+- `HEBBIAN_ACTIVATION_ALPHA=0.1`
+- `HEBBIAN_SPREADING_THRESHOLD=0.4`
+- `HEBBIAN_MAX_FLIPPED=5`
+- `HEBBIAN_KNOWLEDGE_BUFFER_SIZE=10`
+
+Evaluation defaults:
+
+- `HEBBIAN_MODEL=gpt-4o-mini`
+- `HEBBIAN_TAU=1e7`
+- `HEBBIAN_LEARNING_RATE=0.02`
+- `HEBBIAN_DECAY_RATE=0.995`
+- `HEBBIAN_ACTIVATION_ALPHA=0.1`
+- `HEBBIAN_SPREADING_THRESHOLD=0.4`
+- `HEBBIAN_MAX_FLIPPED=1`
+- `HEBBIAN_TOP_K=20`
+- `HEBBIAN_SEMANTIC_TOP_K=5`
+- `HEBBIAN_KEYWORD_WEIGHT=0.7`
 
 ## Run Encoding
-
-The release keeps the paper-side defaults for the `gpt-4o-mini` LongMemEval run:
-
-- `tau = 1e7`
-- `learning_rate = 0.02`
-- `decay_rate = 0.995`
-- `activation_alpha = 0.1`
-- `spreading_threshold = 0.4`
-- `max_flipped = 5`
-
-Example:
 
 ```bash
 bash scripts/encode_longmemeval.sh /path/to/longmemeval_s_200.json results/longmemeval_mem_200
@@ -109,15 +141,6 @@ python -m hela_mem.encode_longmemeval \
 
 ## Run Evaluation
 
-The release keeps the paper-side evaluation defaults for the `gpt-4o-mini` run:
-
-- `top_k = 20`
-- `semantic_top_k = 5`
-- `max_flipped = 1`
-- `keyword_weight = 0.7`
-
-Example:
-
 ```bash
 bash scripts/eval_longmemeval.sh /path/to/longmemeval_s_200.json results/longmemeval_mem_200
 ```
@@ -133,44 +156,13 @@ python -m hela_mem.eval_longmemeval \
   --semantic_top_k 5
 ```
 
-Evaluation writes:
+Outputs are written under:
 
-- per-item outputs to `results/.../eval_results/result_<question_id>.json`
-- overall summary to `results/.../eval_results/eval_summary.json`
+- `results/.../eval_results/result_<question_id>.json`
+- `results/.../eval_results/eval_summary.json`
 
-## Environment Variables
+## Notes
 
-Supported configuration uses `HELA_MEM_*` names and also accepts the old `HEBBIAN_*` names as fallback.
-
-Common options:
-
-- `HELA_MEM_MODEL`
-- `HELA_MEM_TAU`
-- `HELA_MEM_LEARNING_RATE`
-- `HELA_MEM_DECAY_RATE`
-- `HELA_MEM_ACTIVATION_ALPHA`
-- `HELA_MEM_SPREADING_THRESHOLD`
-- `HELA_MEM_MAX_FLIPPED`
-- `HELA_MEM_KB_MAX_FLIPPED`
-- `HELA_MEM_KEYWORD_WEIGHT`
-- `HELA_MEM_USE_TIME_DECAY`
-- `HELA_MEM_USE_KEYWORD_MATCH`
-- `HELA_MEM_KNOWLEDGE_BUFFER_SIZE`
-
-## Validation
-
-The code was cleaned to remove hardcoded private API keys and old repo couplings.
-
-For a no-credentials smoke test, encoding can run with:
-
-```bash
-python -m hela_mem.encode_longmemeval \
-  --data_path /path/to/longmemeval_s_50.json \
-  --output_dir results/smoke \
-  --num_items 1 \
-  --workers 1 \
-  --skip_knowledge
-```
-
-In that mode, keyword extraction falls back to a local heuristic instead of LLM calls.
-If `sentence-transformers` cannot be loaded, the code also falls back to a deterministic hashed embedding for smoke validation only. The actual paper experiment should use the normal `all-MiniLM-L6-v2` embedding path.
+- This release keeps the original experiment-style environment variable names (`HEBBIAN_*`) so existing commands map cleanly.
+- API-key rotation is still supported, but keys must now come from environment variables or a local keys file.
+- The repository has been cleaned for release, but the LongMemEval path is kept source-aligned rather than simplified.

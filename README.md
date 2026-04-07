@@ -1,10 +1,10 @@
 # HeLa-Mem
 
-Code for HeLa-Mem on LongMemEval with `gpt-4o-mini`.
+Code for HeLa-Mem on LongMemEval.
 
 ## LongMemEval Result
 
-The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S with `gpt-4o-mini` on the full `500`-item benchmark:
+The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S on the full `500`-item benchmark:
 
 | Method | Overall ACC |
 | --- | ---: |

@@ -2,15 +2,6 @@
 
 Code for HeLa-Mem on LongMemEval with `gpt-4o-mini`.
 
-This repository is not a toy rewrite. The LongMemEval path is carried over from the original experiment code and then cleaned for release:
-
-- removed hardcoded private API keys
-- removed dependencies on unrelated project directories
-- kept the original LongMemEval encode/eval logic
-- kept the original Hebbian memory, retriever, knowledge memory, and GPT-judge evaluation flow
-
-The repository intentionally excludes unrelated codepaths such as LoCoMo, MemoryOS, MemoryChain, paper assets, and old result directories.
-
 ## LongMemEval Result
 
 The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S with `gpt-4o-mini` on the full `500`-item benchmark:

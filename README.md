@@ -11,6 +11,34 @@ This repository is not a toy rewrite. The LongMemEval path is carried over from 
 
 The repository intentionally excludes unrelated codepaths such as LoCoMo, MemoryOS, MemoryChain, paper assets, and old result directories.
 
+## LongMemEval Result
+
+The paper-reported LongMemEval-S result on the full `500`-item benchmark with `gpt-4o-mini` is:
+
+| Method | Overall ACC |
+| --- | ---: |
+| LangMem | 37.20 |
+| MemoryOS | 44.80 |
+| Mem0 | 53.61 |
+| FullText | 56.80 |
+| NaiveRAG | 61.00 |
+| A-MEM | 62.60 |
+| **HeLa-Mem (Ours)** | **65.40** |
+
+Best paper configuration:
+
+- `HEBBIAN_MAX_FLIPPED=3`
+- `HEBBIAN_KEYWORD_WEIGHT=0.7`
+- `HEBBIAN_ACTIVATION_ALPHA=0.1`
+- `HEBBIAN_SPREADING_THRESHOLD=0.4`
+- `HEBBIAN_LEARNING_RATE=0.02`
+- `HEBBIAN_DECAY_RATE=0.995`
+- `HEBBIAN_TAU=1e7`
+- `top_k=15` episodic
+- `semantic_top_k=5`
+- `gpt-4o-mini` backbone
+- `gpt-4o-mini` LLM-as-judge
+
 ## Included Code
 
 ```text
@@ -62,8 +90,6 @@ The default model is `gpt-4o-mini`.
 
 ## Dataset Format
 
-This repository does not bundle LongMemEval-S.
-
 Expected fields per item:
 
 - `question_id`
@@ -73,6 +99,10 @@ Expected fields per item:
 - `question_date`
 - `haystack_dates`
 - `haystack_sessions`
+
+The complete `500`-item LongMemEval-S file is bundled in this repository:
+
+- [data/longmemeval_s.json](/Users/h1syu1/PythonProjects/HeLa-Mem/data/longmemeval_s.json)
 
 ## Experiment Entry Points
 
@@ -98,7 +128,7 @@ Evaluation does:
 
 ## Paper-Aligned Defaults
 
-The included shell scripts keep the paper-side `gpt-4o-mini` defaults from the original run.
+The included shell scripts default to the paper-side `gpt-4o-mini` LongMemEval setting.
 
 Encoding defaults:
 
@@ -108,7 +138,7 @@ Encoding defaults:
 - `HEBBIAN_DECAY_RATE=0.995`
 - `HEBBIAN_ACTIVATION_ALPHA=0.1`
 - `HEBBIAN_SPREADING_THRESHOLD=0.4`
-- `HEBBIAN_MAX_FLIPPED=5`
+- `HEBBIAN_MAX_FLIPPED=3`
 - `HEBBIAN_KNOWLEDGE_BUFFER_SIZE=10`
 
 Evaluation defaults:
@@ -119,40 +149,51 @@ Evaluation defaults:
 - `HEBBIAN_DECAY_RATE=0.995`
 - `HEBBIAN_ACTIVATION_ALPHA=0.1`
 - `HEBBIAN_SPREADING_THRESHOLD=0.4`
-- `HEBBIAN_MAX_FLIPPED=1`
-- `HEBBIAN_TOP_K=20`
+- `HEBBIAN_MAX_FLIPPED=3`
+- `HEBBIAN_TOP_K=15`
 - `HEBBIAN_SEMANTIC_TOP_K=5`
 - `HEBBIAN_KEYWORD_WEIGHT=0.7`
 
-## Run Encoding
+## Reproduce
+
+Configure your zzz/OpenAI-compatible credentials:
 
 ```bash
-bash scripts/encode_longmemeval.sh /path/to/longmemeval_s_200.json results/longmemeval_mem_200
+export OPENAI_API_KEY="your-key"
+export OPENAI_BASE_URL="your-base-url"
+```
+
+Then run the full `500`-item experiment.
+
+### 1. Encode
+
+```bash
+bash scripts/encode_longmemeval.sh
 ```
 
 Or directly:
 
 ```bash
 python -m hela_mem.encode_longmemeval \
-  --data_path /path/to/longmemeval_s_200.json \
-  --output_dir results/longmemeval_mem_200 \
+  --data_path data/longmemeval_s.json \
+  --output_dir results/longmemeval_mem_full \
   --workers 8
 ```
 
-## Run Evaluation
+### 2. Evaluate
 
 ```bash
-bash scripts/eval_longmemeval.sh /path/to/longmemeval_s_200.json results/longmemeval_mem_200
+bash scripts/eval_longmemeval.sh
 ```
 
 Or directly:
 
 ```bash
 python -m hela_mem.eval_longmemeval \
-  --data_path /path/to/longmemeval_s_200.json \
-  --mem_dir results/longmemeval_mem_200 \
+  --data_path data/longmemeval_s.json \
+  --mem_dir results/longmemeval_mem_full \
   --workers 8 \
-  --top_k 20 \
+  --top_k 15 \
   --semantic_top_k 5
 ```
 
@@ -160,6 +201,8 @@ Outputs are written under:
 
 - `results/.../eval_results/result_<question_id>.json`
 - `results/.../eval_results/eval_summary.json`
+
+If you want a smaller sanity-check run, keep the same dataset file and add `--num_items 100` or another cap to both encode and eval.
 
 ## Notes
 

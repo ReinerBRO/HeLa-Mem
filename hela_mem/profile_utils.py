@@ -8,8 +8,7 @@ from openai import OpenAI
 class OpenAIClient:
     def __init__(self, api_key, base_url=None):
         kwargs = {"api_key": api_key}
-        if base_url:
-            kwargs["base_url"] = base_url
+        kwargs["base_url"] = base_url or "https://api.openai.com/v1"
         self.client = OpenAI(**kwargs)
 
     def chat_completion(self, model, messages, temperature=0.7, max_tokens=2000):

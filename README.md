@@ -156,11 +156,11 @@ Evaluation defaults:
 
 ## Reproduce
 
-Configure your zzz/OpenAI-compatible credentials:
+Configure standard OpenAI credentials:
 
 ```bash
 export OPENAI_API_KEY="your-key"
-export OPENAI_BASE_URL="your-base-url"
+export OPENAI_BASE_URL="https://api.openai.com/v1"
 ```
 
 Then run the full `500`-item experiment.
@@ -208,4 +208,5 @@ If you want a smaller sanity-check run, keep the same dataset file and add `--nu
 
 - This release keeps the original experiment-style environment variable names (`HEBBIAN_*`) so existing commands map cleanly.
 - API-key rotation is still supported, but keys must now come from environment variables or a local keys file.
+- The code uses the standard OpenAI Python SDK request pattern (`client.chat.completions.create`) with `OPENAI_API_KEY` and the official OpenAI base URL by default.
 - The repository has been cleaned for release, but the LongMemEval path is kept source-aligned rather than simplified.

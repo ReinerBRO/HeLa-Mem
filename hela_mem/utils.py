@@ -58,7 +58,7 @@ def _create_client(api_key=None):
         api_key = _get_next_api_key()
     return OpenAI(
         api_key=api_key,
-        base_url=os.environ.get("OPENAI_BASE_URL")
+        base_url=os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
     )
 
 try:

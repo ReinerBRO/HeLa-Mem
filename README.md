@@ -126,34 +126,6 @@ Evaluation does:
 - per-item result saving
 - summary aggregation
 
-## Paper-Aligned Defaults
-
-The included shell scripts default to the paper-side `gpt-4o-mini` LongMemEval setting.
-
-Encoding defaults:
-
-- `HEBBIAN_MODEL=gpt-4o-mini`
-- `HEBBIAN_TAU=1e7`
-- `HEBBIAN_LEARNING_RATE=0.02`
-- `HEBBIAN_DECAY_RATE=0.995`
-- `HEBBIAN_ACTIVATION_ALPHA=0.1`
-- `HEBBIAN_SPREADING_THRESHOLD=0.4`
-- `HEBBIAN_MAX_FLIPPED=3`
-- `HEBBIAN_KNOWLEDGE_BUFFER_SIZE=10`
-
-Evaluation defaults:
-
-- `HEBBIAN_MODEL=gpt-4o-mini`
-- `HEBBIAN_TAU=1e7`
-- `HEBBIAN_LEARNING_RATE=0.02`
-- `HEBBIAN_DECAY_RATE=0.995`
-- `HEBBIAN_ACTIVATION_ALPHA=0.1`
-- `HEBBIAN_SPREADING_THRESHOLD=0.4`
-- `HEBBIAN_MAX_FLIPPED=3`
-- `HEBBIAN_TOP_K=15`
-- `HEBBIAN_SEMANTIC_TOP_K=5`
-- `HEBBIAN_KEYWORD_WEIGHT=0.7`
-
 ## Reproduce
 
 Configure standard OpenAI credentials:

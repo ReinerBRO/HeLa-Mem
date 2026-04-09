@@ -2,6 +2,8 @@
 
 Code for HeLa-Mem on LongMemEval.
 
+LoCoMo evaluation code will be released in the future.
+
 ## LongMemEval Result
 
 The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S on the full `500`-item benchmark:

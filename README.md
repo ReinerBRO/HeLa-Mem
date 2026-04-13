@@ -18,20 +18,6 @@ The table below shows the target reproduce results of HeLa-Mem on LongMemEval-S 
 | A-MEM | 62.60 |
 | **HeLa-Mem (Ours)** | **65.40** |
 
-Best paper configuration:
-
-- `HEBBIAN_MAX_FLIPPED=3`
-- `HEBBIAN_KEYWORD_WEIGHT=0.7`
-- `HEBBIAN_ACTIVATION_ALPHA=0.1`
-- `HEBBIAN_SPREADING_THRESHOLD=0.4`
-- `HEBBIAN_LEARNING_RATE=0.02`
-- `HEBBIAN_DECAY_RATE=0.995`
-- `HEBBIAN_TAU=1e7`
-- `top_k=15` episodic
-- `semantic_top_k=5`
-- `gpt-4o-mini` backbone
-- `gpt-4o-mini` LLM-as-judge
-
 ## Included Code
 
 ```text

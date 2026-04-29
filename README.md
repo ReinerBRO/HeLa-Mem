@@ -1,5 +1,11 @@
 # HeLa-Mem
 
+Code for **HeLa-Mem: Hebbian Learning and Associative Memory for LLM Agents** — accepted by **ACL 2026 (main)**.
+
+Paper: [arXiv:2604.16839](https://arxiv.org/abs/2604.16839)
+
+![Framework](https://arxiv.org/html/2604.16839/x2.png)
+
 Code for HeLa-Mem on LongMemEval.
 
 LoCoMo evaluation code will be released in the future.

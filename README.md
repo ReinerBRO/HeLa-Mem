@@ -167,3 +167,14 @@ If you want a smaller sanity-check run, keep the same dataset file and add `--nu
 - API-key rotation is still supported, but keys must now come from environment variables or a local keys file.
 - The code uses the standard OpenAI Python SDK request pattern (`client.chat.completions.create`) with `OPENAI_API_KEY` and the official OpenAI base URL by default.
 - The repository has been cleaned for release, but the LongMemEval path is kept source-aligned rather than simplified.
+
+## Citation
+
+```bibtex
+@article{zhu2026hela,
+  title={HeLa-Mem: Hebbian Learning and Associative Memory for LLM Agents},
+  author={Zhu, Jinchang and Li, Jindong and Zhang, Cheng and Liu, Jiahong and Yang, Menglin},
+  journal={arXiv preprint arXiv:2604.16839},
+  year={2026}
+}
+```

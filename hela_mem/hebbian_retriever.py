@@ -3,12 +3,11 @@ from .utils import gpt_generate_answer
 from .reranker import rerank_memories
 
 class HebbianRetriever:
-    def __init__(self, memory_graph, profile_memory=None, use_investigator=False, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
+    def __init__(self, memory_graph, profile_memory=None, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
         self.graph = memory_graph
         # Optional: Connect to a static profile memory if we want strictly separate semantic layer
         # But in pure Hebbian philosophy, the graph contains everything.
         self.profile_memory = profile_memory 
-        self.use_investigator = use_investigator
         self.use_architect = use_architect
         self.use_hippocampus = use_hippocampus
         self.use_extra_prompt = use_extra_prompt  # [NEW] Separate Hebbian memories in prompt
@@ -198,32 +197,6 @@ class HebbianRetriever:
         
         # 9. Generate
         response = gpt_generate_answer(user_prompt, messages)
-        
-        # [NEW] Investigator Agent Interface (Iterative Retrieval)
-        if self.use_investigator:
-            new_query = self.investigator_agent(query, response)
-            if new_query:
-                # Retrieve additional context
-                extra_results = self.graph.retrieve(new_query, top_k=top_k)
-                # Merge results (avoid duplicates)
-                existing_ids = {res["node"]["id"] for res in results}
-                for res in extra_results:
-                    if res["node"]["id"] not in existing_ids:
-                        results.append(res)
-                        # Add to context text
-                        node = res["node"]
-                        score = res["score"]
-                        source = "Investigator Search"
-                        block = (
-                            f"[{source} | Relevancy: {score:.2f}]\n"
-                            f"Time: {node['timestamp']}\n"
-                            f"Content: {node['content']}"
-                        )
-                        context_blocks.append(block)
-                
-                # Re-build Context and Prompt (Simplified for brevity, ideally loop back)
-                context_text = "\n\n".join(context_blocks)
-                # ... (Re-prompt logic would go here)
 
         return response, results
 
@@ -303,41 +276,6 @@ class HebbianRetriever:
         except Exception as e:
             print(f"Hippocampal Agent failed: {e}")
             return results[:target_count]
-
-    def investigator_agent(self, query, current_answer):
-        """
-        External Investigator Agent to check answer sufficiency.
-        Returns 'SUFFICIENT' or a new search query.
-        """
-        try:
-            inv_system_prompt = (
-                "You are a Quality Assurance Investigator for a memory system.\n"
-                "Your task is to check if the Current Answer fully and specifically answers the User Question.\n"
-                "RULES:\n"
-                "1. If the answer is VAGUE (e.g., 'a friend', 'somewhere', 'he did it') but lacks specific names/dates/places, output the SPECIFIC KEYWORDS needed to find the missing info (e.g., 'Jon friend name').\n"
-                "2. If the answer misses part of the question (e.g., asks for 'Who and When' but only answers 'Who'), output a QUERY for the missing part.\n"
-                "3. If the answer is complete and contains concrete entities, output 'SUFFICIENT'.\n"
-                "4. Output ONLY the query string or 'SUFFICIENT'. Do NOT output the text 'NEW KEYWORD QUERY'."
-            )
-            
-            inv_user_prompt = f"User Question: {query}\nCurrent Answer: {current_answer}\nDecision:"
-            
-            messages = [
-                {"role": "system", "content": inv_system_prompt},
-                {"role": "user", "content": inv_user_prompt}
-            ]
-            
-            decision = gpt_generate_answer(inv_user_prompt, messages).strip()
-            
-            if "SUFFICIENT" in decision.upper() or len(decision) < 3:
-                return None
-            
-            print(f"[Investigator] Insufficient. New Search: '{decision}'")
-            return decision
-            
-        except Exception as e:
-            print(f"Investigator Agent failed: {e}")
-            return None
 
     def process_conversation_turn(self, user_input, agent_response, timestamp=None):
         """

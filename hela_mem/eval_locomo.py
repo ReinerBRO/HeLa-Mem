@@ -235,7 +235,6 @@ def evaluate_single_sample(
     retriever = HebbianRetriever(
         memory_graph,
         profile_memory=knowledge_memory,
-        use_investigator=_env_flag("HEBBIAN_USE_INVESTIGATOR"),
         use_architect=_env_flag("HEBBIAN_USE_ARCHITECT"),
         use_hippocampus=_env_flag("HEBBIAN_USE_HIPPOCAMPUS"),
         use_extra_prompt=_env_flag("HEBBIAN_USE_EXTRA_PROMPT"),

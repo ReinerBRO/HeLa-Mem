@@ -35,7 +35,6 @@ HeLa-Mem/
 │   ├── hebbian_memory.py
 │   ├── hebbian_retriever.py
 │   ├── profile_utils.py
-│   ├── reranker.py
 │   └── utils.py
 ├── scripts/
 │   ├── encode_longmemeval.sh

@@ -342,25 +342,7 @@ def answer_question(
         (answer_text, retrieved_results)
     """
     # 1. Episodic retrieval
-    use_reranker = os.environ.get("HEBBIAN_USE_RERANKER", "false").lower() == "true"
-    rerank_pool_multiplier = int(os.environ.get("HEBBIAN_RERANK_POOL_MULTIPLIER", "3"))
-
-    retrieve_k = top_k * rerank_pool_multiplier if use_reranker else top_k
-    results = retriever.graph.retrieve(question, top_k=retrieve_k)
-
-    if use_reranker and len(results) > top_k:
-        from .reranker import rerank_memories
-        memories_to_rerank = [{"content": r["node"]["content"], **r} for r in results]
-        reranked = rerank_memories(question, memories_to_rerank, top_k=top_k)
-        results = [
-            {
-                "node": r["node"],
-                "score": r["score"],
-                "base_score": r["base_score"],
-                "source": r.get("source", "base"),
-            }
-            for r in reranked
-        ]
+    results = retriever.graph.retrieve(question, top_k=top_k)
 
     # Build episodic context
     context_blocks = []
@@ -708,7 +690,6 @@ def eval_longmemeval(
             "decay_rate": os.environ.get("HEBBIAN_DECAY_RATE", "0.995"),
             "keyword_weight": os.environ.get("HEBBIAN_KEYWORD_WEIGHT", "0.5"),
             "tau": os.environ.get("HEBBIAN_TAU", "1e7"),
-            "use_reranker": os.environ.get("HEBBIAN_USE_RERANKER", "false"),
         },
         "results": all_results,
     }

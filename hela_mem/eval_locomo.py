@@ -90,13 +90,6 @@ def calculate_bleu1(prediction: Any, reference: Any) -> float:
     return brevity_penalty * precision
 
 
-def _env_flag(name: str, default: bool = False) -> bool:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
 def _category_key(category: Any) -> int:
     try:
         return int(category)
@@ -235,9 +228,6 @@ def evaluate_single_sample(
     retriever = HebbianRetriever(
         memory_graph,
         profile_memory=knowledge_memory,
-        use_architect=_env_flag("HEBBIAN_USE_ARCHITECT"),
-        use_hippocampus=_env_flag("HEBBIAN_USE_HIPPOCAMPUS"),
-        use_extra_prompt=_env_flag("HEBBIAN_USE_EXTRA_PROMPT"),
     )
 
     qa_pairs = list(sample.get("qa", []))
@@ -367,7 +357,6 @@ def eval_locomo(
             "decay_rate": os.environ.get("HEBBIAN_DECAY_RATE", "0.995"),
             "keyword_weight": os.environ.get("HEBBIAN_KEYWORD_WEIGHT", "0.5"),
             "tau": os.environ.get("HEBBIAN_TAU", "5184000"),
-            "use_extra_prompt": os.environ.get("HEBBIAN_USE_EXTRA_PROMPT", "false"),
         },
         "metrics": summary_metrics,
         "results": sorted(

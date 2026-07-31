@@ -3,7 +3,7 @@ from .utils import gpt_generate_answer
 from .reranker import rerank_memories
 
 class HebbianRetriever:
-    def __init__(self, memory_graph, profile_memory=None, use_planner=False, use_investigator=False, use_critic=False, use_surgeon=False, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
+    def __init__(self, memory_graph, profile_memory=None, use_planner=False, use_investigator=False, use_critic=False, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
         self.graph = memory_graph
         # Optional: Connect to a static profile memory if we want strictly separate semantic layer
         # But in pure Hebbian philosophy, the graph contains everything.
@@ -11,7 +11,6 @@ class HebbianRetriever:
         self.use_planner = use_planner
         self.use_investigator = use_investigator
         self.use_critic = use_critic
-        self.use_surgeon = use_surgeon
         self.use_architect = use_architect
         self.use_hippocampus = use_hippocampus
         self.use_extra_prompt = use_extra_prompt  # [NEW] Separate Hebbian memories in prompt
@@ -314,69 +313,6 @@ class HebbianRetriever:
             print(f"Hippocampal Agent failed: {e}")
             return results[:target_count]
 
-    def surgeon_agent(self, query, results):
-        """
-        External Surgeon Agent to refine context by removing noise.
-        Returns the filtered list of result objects.
-        """
-        if not results:
-            return []
-            
-        try:
-            # Format candidates for the LLM
-            candidates_text = ""
-            for i, res in enumerate(results):
-                candidates_text += f"[{i}] {res['node']['content']}\n"
-            
-            surgeon_system_prompt = (
-                "You are a Context Surgeon. Your task is to filter a list of retrieved memories.\n"
-                "RULES:\n"
-                "1. Read the User Question and the Candidate Memories.\n"
-                "2. Identify which memories are RELEVANT to answering the question.\n"
-                "3. Return the INDICES of the relevant memories as a JSON list (e.g., [0, 2, 4]).\n"
-                "4. If a memory is noise or completely irrelevant, exclude its index.\n"
-                "5. If NO memories are relevant, return an empty list [].\n"
-                "6. Output ONLY the JSON list."
-            )
-            
-            surgeon_user_prompt = f"User Question: {query}\n\nCandidate Memories:\n{candidates_text}\n\nRelevant Indices (JSON):"
-            
-            messages = [
-                {"role": "system", "content": surgeon_system_prompt},
-                {"role": "user", "content": surgeon_user_prompt}
-            ]
-            
-            response_text = gpt_generate_answer(surgeon_user_prompt, messages).strip()
-            
-            # Parse JSON list
-            import json
-            try:
-                # Try to find JSON-like structure if there's extra text
-                start = response_text.find('[')
-                end = response_text.rfind(']') + 1
-                if start != -1 and end != -1:
-                    json_str = response_text[start:end]
-                    indices = json.loads(json_str)
-                else:
-                    # Fallback: try to parse comma separated numbers
-                    indices = [int(x.strip()) for x in response_text.split(',') if x.strip().isdigit()]
-            except:
-                print(f"Surgeon Agent failed to parse JSON: {response_text}")
-                return results # Fallback to keep all
-                
-            # Filter results
-            filtered_results = []
-            for idx in indices:
-                if isinstance(idx, int) and 0 <= idx < len(results):
-                    filtered_results.append(results[idx])
-            
-            print(f"[Surgeon] Filtered {len(results)} -> {len(filtered_results)} memories.")
-            return filtered_results
-            
-        except Exception as e:
-            print(f"Surgeon Agent failed: {e}")
-            return results
-
     def critic_agent(self, query, initial_answer):
         """
         External Critic Agent to refine the answer for metric optimization.
@@ -490,4 +426,3 @@ class HebbianRetriever:
         # Combine into a single episodic chunk
         content = f"User: {user_input}\nAI: {agent_response}"
         self.graph.add_memory(content, role="interaction", timestamp=timestamp)
-

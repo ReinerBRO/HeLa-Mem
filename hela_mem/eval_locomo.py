@@ -238,7 +238,6 @@ def evaluate_single_sample(
         use_planner=_env_flag("HEBBIAN_USE_PLANNER"),
         use_investigator=_env_flag("HEBBIAN_USE_INVESTIGATOR"),
         use_critic=_env_flag("HEBBIAN_USE_CRITIC"),
-        use_surgeon=_env_flag("HEBBIAN_USE_SURGEON"),
         use_architect=_env_flag("HEBBIAN_USE_ARCHITECT"),
         use_hippocampus=_env_flag("HEBBIAN_USE_HIPPOCAMPUS"),
         use_extra_prompt=_env_flag("HEBBIAN_USE_EXTRA_PROMPT"),

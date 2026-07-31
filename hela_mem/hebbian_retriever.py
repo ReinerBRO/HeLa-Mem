@@ -3,14 +3,12 @@ from .utils import gpt_generate_answer
 from .reranker import rerank_memories
 
 class HebbianRetriever:
-    def __init__(self, memory_graph, profile_memory=None, use_planner=False, use_investigator=False, use_critic=False, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
+    def __init__(self, memory_graph, profile_memory=None, use_investigator=False, use_architect=False, use_hippocampus=False, use_extra_prompt=False):
         self.graph = memory_graph
         # Optional: Connect to a static profile memory if we want strictly separate semantic layer
         # But in pure Hebbian philosophy, the graph contains everything.
         self.profile_memory = profile_memory 
-        self.use_planner = use_planner
         self.use_investigator = use_investigator
-        self.use_critic = use_critic
         self.use_architect = use_architect
         self.use_hippocampus = use_hippocampus
         self.use_extra_prompt = use_extra_prompt  # [NEW] Separate Hebbian memories in prompt
@@ -19,10 +17,7 @@ class HebbianRetriever:
         """
         Generate answer using Hebbian retrieval context
         """
-        # [NEW] Planner Agent Interface
         search_query = query
-        if self.use_planner:
-            search_query = self.planner_agent(query)
 
         # 1. Retrieve from Graph
         # This handles Vector Search + Spreading Activation + Reinforcement internally
@@ -230,10 +225,6 @@ class HebbianRetriever:
                 context_text = "\n\n".join(context_blocks)
                 # ... (Re-prompt logic would go here)
 
-        # [NEW] Critic Agent Interface
-        if self.use_critic:
-            response = self.critic_agent(query, response)
-        
         return response, results
 
     def hippocampal_agent(self, query, results, target_count=15):
@@ -313,41 +304,6 @@ class HebbianRetriever:
             print(f"Hippocampal Agent failed: {e}")
             return results[:target_count]
 
-    def critic_agent(self, query, initial_answer):
-        """
-        External Critic Agent to refine the answer for metric optimization.
-        This acts as a post-processing step to enforce formatting rules.
-        """
-        try:
-            critic_system_prompt = (
-                "You are a strict editor optimizing answers for an automated evaluation metric (F1/BLEU).\n"
-                "Your goal is to make the answer extremely concise and strictly formatted.\n"
-                "RULES:\n"
-                "1. Remove leading articles ('The', 'A', 'An').\n"
-                "2. Remove trailing punctuation ('.').\n"
-                "3. Format dates strictly as '15 July, 2023' (Day Month, Year).\n"
-                "4. Keep ONLY the core entity or key phrase.\n"
-                "5. If the answer is already perfect, output it unchanged."
-            )
-            
-            critic_user_prompt = (
-                f"Original Question: {query}\n"
-                f"Initial Answer: {initial_answer}\n\n"
-                f"Refined Answer (content only):"
-            )
-            
-            messages = [
-                {"role": "system", "content": critic_system_prompt},
-                {"role": "user", "content": critic_user_prompt}
-            ]
-            
-            refined_answer = gpt_generate_answer(critic_user_prompt, messages)
-            return refined_answer.strip()
-            
-        except Exception as e:
-            print(f"Critic Agent failed: {e}")
-            return initial_answer
-
     def investigator_agent(self, query, current_answer):
         """
         External Investigator Agent to check answer sufficiency.
@@ -382,41 +338,6 @@ class HebbianRetriever:
         except Exception as e:
             print(f"Investigator Agent failed: {e}")
             return None
-
-    def planner_agent(self, query):
-        """
-        External Planner Agent to decompose or expand complex queries.
-        This acts as a pre-processing step to improve retrieval recall.
-        """
-        try:
-            planner_system_prompt = (
-                "You are a Query Optimizer for a Hebbian Memory Graph.\n"
-                "Your task is to rewrite the user's question into a keyword-rich search query.\n"
-                "RULES:\n"
-                "1. If the question is simple, return it unchanged.\n"
-                "2. If the question is Multi-hop (e.g. 'Who is the boss of the person who...'), rewrite it to include keywords for ALL hops.\n"
-                "3. If the question implies a time range, add specific temporal keywords if possible.\n"
-                "4. Output ONLY the rewritten query."
-            )
-            
-            planner_user_prompt = f"Original Question: {query}\nOptimized Query:"
-            
-            messages = [
-                {"role": "system", "content": planner_system_prompt},
-                {"role": "user", "content": planner_user_prompt}
-            ]
-            
-            optimized_query = gpt_generate_answer(planner_user_prompt, messages)
-            # If the optimizer fails or returns empty, fallback to original
-            if not optimized_query or len(optimized_query) < 5:
-                return query
-                
-            print(f"[Planner] Optimized: '{query}' -> '{optimized_query}'")
-            return optimized_query.strip()
-            
-        except Exception as e:
-            print(f"Planner Agent failed: {e}")
-            return query
 
     def process_conversation_turn(self, user_input, agent_response, timestamp=None):
         """
